@@ -1,8 +1,12 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from contextlib import asynccontextmanager
+from aiogram.types import Update
 from app.core import bot, dp
 from app.config import WEBHOOK_PATH, FULL_WEBHOOK
+import logging
+
+logger = logging.getLogger("hauzmate")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -87,6 +91,8 @@ async def welcome():
 
 @app.post(WEBHOOK_PATH)
 async def webhook(request: Request):
-    update = await request.json()
+    update_dict = await request.json()
+    logger.info("Incoming webhook: %s", update_dict)
+    update = Update(**update_dict)
     await dp.feed_update(bot=bot, update=update)
     return {"ok": True}
