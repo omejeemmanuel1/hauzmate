@@ -1,15 +1,79 @@
 from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from contextlib import asynccontextmanager
 from app.core import bot, dp
 from app.config import WEBHOOK_PATH, FULL_WEBHOOK
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    await bot.set_webhook(FULL_WEBHOOK)
+    yield
+    # Shutdown
+    await bot.session.close()
+
+app = FastAPI(lifespan=lifespan)
+
+@app.get("/", response_class=HTMLResponse)
+async def welcome():
+    return """
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>HauzMate</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                margin: 0;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            }
+            .container {
+                text-align: center;
+                background: white;
+                padding: 40px;
+                border-radius: 10px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            h1 {
+                color: #333;
+                margin: 0 0 10px;
+            }
+            p {
+                color: #666;
+                margin: 10px 0;
+            }
+            a {
+                display: inline-block;
+                margin-top: 20px;
+                padding: 12px 30px;
+                background: #667eea;
+                color: white;
+                text-decoration: none;
+                border-radius: 5px;
+                transition: background 0.3s;
+            }
+            a:hover {
+                background: #764ba2;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>🏠 HauzMate</h1>
+            <p>Find your perfect space or list your property</p>
+            <p>Connect with us on Telegram to get started!</p>
+            <a href="https://t.me/HauzMateBot">Open Bot on Telegram</a>
+        </div>
+    </body>
+    </html>
+    """
 
 @app.post(WEBHOOK_PATH)
 async def webhook(request: Request):
     update = await request.json()
     await dp.feed_update(bot=bot, update=update)
     return {"ok": True}
-
-@app.on_event("startup")
-async def startup():
-    await bot.set_webhook(FULL_WEBHOOK)
