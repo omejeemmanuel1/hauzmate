@@ -37,6 +37,7 @@ async def welcome():
                 padding: 40px;
                 border-radius: 10px;
                 box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                max-width: 500px;
             }
             h1 {
                 color: #333;
@@ -46,9 +47,13 @@ async def welcome():
                 color: #666;
                 margin: 10px 0;
             }
+            .button-group {
+                margin-top: 30px;
+                display: flex;
+                gap: 10px;
+                justify-content: center;
+            }
             a {
-                display: inline-block;
-                margin-top: 20px;
                 padding: 12px 30px;
                 background: #667eea;
                 color: white;
@@ -59,14 +64,22 @@ async def welcome():
             a:hover {
                 background: #764ba2;
             }
+            a.secondary {
+                background: #48bb78;
+            }
+            a.secondary:hover {
+                background: #38a169;
+            }
         </style>
     </head>
     <body>
         <div class="container">
             <h1>🏠 HauzMate</h1>
             <p>Find your perfect space or list your property</p>
-            <p>Connect with us on Telegram to get started!</p>
-            <a href="https://t.me/HauzMateBot">Open Bot on Telegram</a>
+            <div class="button-group">
+                <a href="https://t.me/HauzMateBot">Start Bot</a>
+                <a class="secondary" href="https://t.me/+6hrnpdbiwgg2M2U0">View Listings</a>
+            </div>
         </div>
     </body>
     </html>
