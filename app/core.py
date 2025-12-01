@@ -7,7 +7,7 @@ from app.config import BOT_TOKEN, GROUP_ID
 from app.middleware import LoggingMiddleware
 from app.payments import router as payments_router
 
-bot = Bot(token=BOT_TOKEN, parse_mode="HTML")
+bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 router = Router()
 
@@ -186,7 +186,7 @@ async def owner_contact(message: types.Message, state: FSMContext):
         f"Posted by: @{message.from_user.username or 'Unknown'}"
     )
     
-    await bot.send_message(GROUP_ID, listing)
+    await bot.send_message(GROUP_ID, listing, parse_mode="HTML")
     await message.answer("✅ Your listing has been posted! Thank you for using HauzMate.")
     await state.clear()
 
@@ -266,7 +266,7 @@ async def seeker_contact(message: types.Message, state: FSMContext):
         f"Posted by: @{message.from_user.username or 'Unknown'}"
     )
     
-    await bot.send_message(GROUP_ID, listing)
+    await bot.send_message(GROUP_ID, listing, parse_mode="HTML")
     await message.answer("✅ Your request has been posted! Thank you for using HauzMate.")
     await state.clear()
 
