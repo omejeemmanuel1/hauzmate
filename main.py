@@ -78,7 +78,7 @@ async def welcome():
     </head>
     <body>
         <div class="container">
-            <h1>🏠 HauzMate</h1>
+            <h1>HauzMate</h1>
             <p>Find your perfect space or list your property</p>
             <div class="button-group">
                 <a href="https://t.me/HauzMateBot">Start Bot</a>
