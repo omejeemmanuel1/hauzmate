@@ -1,4 +1,4 @@
-# HauzMate — Telegram Housing Marketplace Bot
+# HauzMate - Telegram Housing Marketplace Bot
 
 Simple Telegram bot + FastAPI webhook that lets space owners post listings and seekers submit requests. Built with aiogram (Telegram FSM) and FastAPI for webhook handling.
 
