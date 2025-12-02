@@ -1,11 +1,19 @@
+# app/core.py
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
+from contextlib import asynccontextmanager
+from aiogram.types import Update
 from aiogram import Bot, Dispatcher, Router, types, F
 from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
-from app.config import BOT_TOKEN
+from app.config import BOT_TOKEN, WEBHOOK_PATH, FULL_WEBHOOK
 from app.middleware import LoggingMiddleware
 from app.payments import router as payments_router
+import logging
+
+logger = logging.getLogger("hauzmate")
 
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
@@ -75,7 +83,6 @@ async def start(message: types.Message, state: FSMContext):
         keyboard=[[KeyboardButton(text="Space Owner")], [KeyboardButton(text="Space Seeker")]],
         resize_keyboard=True
     )
-
     await bot.send_message(
         chat_id=message.from_user.id,
         text="Welcome to HauzMate!\n\nAre you a space owner or seeker?",
@@ -87,21 +94,12 @@ async def start(message: types.Message, state: FSMContext):
 async def user_type_handler(message: types.Message, state: FSMContext):
     user_type = message.text
     await state.update_data(user_type=user_type)
-    
     if user_type == "Space Owner":
         await state.set_state(OwnerForm.religion)
-        await bot.send_message(
-            chat_id=message.from_user.id,
-            text="What's your religion preference you want?",
-            reply_markup=get_religion_keyboard()
-        )
+        await bot.send_message(chat_id=message.from_user.id, text="What's your religion preference you want?", reply_markup=get_religion_keyboard())
     else:
         await state.set_state(SeekerForm.religion)
-        await bot.send_message(
-            chat_id=message.from_user.id,
-            text="What's your own religion?",
-            reply_markup=get_religion_keyboard()
-        )
+        await bot.send_message(chat_id=message.from_user.id, text="What's your own religion?", reply_markup=get_religion_keyboard())
 
 @router.message(UserType.user_type)
 async def invalid_user_type(message: types.Message):
@@ -163,7 +161,6 @@ async def owner_preference(message: types.Message, state: FSMContext):
 async def owner_contact(message: types.Message, state: FSMContext):
     await state.update_data(contact=message.text)
     data = await state.get_data()
-    
     listing = (
         f"<b>SPACE OWNER LISTING</b>\n\n"
         f"<b>Religion:</b> {data['religion']}\n"
@@ -177,11 +174,9 @@ async def owner_contact(message: types.Message, state: FSMContext):
         f"<b>Contact:</b> {data['contact']}\n\n"
         f"Posted by: @{message.from_user.username or 'Unknown'}"
     )
-    
     await bot.send_message(message.from_user.id, listing, parse_mode="HTML")
     await bot.send_message(message.from_user.id, "Your listing has been sent privately! ✅")
     await state.clear()
-
 
 @router.message(SeekerForm.religion, F.text.in_(["Christian", "Muslim", "Any"]))
 async def seeker_religion(message: types.Message, state: FSMContext):
@@ -233,7 +228,6 @@ async def seeker_preference(message: types.Message, state: FSMContext):
 async def seeker_contact(message: types.Message, state: FSMContext):
     await state.update_data(contact=message.text)
     data = await state.get_data()
-    
     listing = (
         f"<b>SPACE SEEKER REQUEST</b>\n\n"
         f"<b>Religion:</b> {data['religion']}\n"
@@ -246,14 +240,36 @@ async def seeker_contact(message: types.Message, state: FSMContext):
         f"<b>Contact:</b> {data['contact']}\n\n"
         f"Posted by: @{message.from_user.username or 'Unknown'}"
     )
-    
     await bot.send_message(message.from_user.id, listing, parse_mode="HTML")
     await bot.send_message(message.from_user.id, "Your request has been sent privately! ✅")
     await state.clear()
 
+@router.message()
+async def welcome_new_user(message: types.Message):
+    if message.new_chat_members:
+        for user in message.new_chat_members:
+            await message.answer(f"Welcome {user.full_name} to the group! 🎉")
 
 dp.include_router(router)
 dp.include_router(payments_router)
 dp.update.middleware(LoggingMiddleware())
 
-__all__ = ["bot", "dp"]
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await bot.set_webhook(FULL_WEBHOOK)
+    yield
+    await bot.session.close()
+
+app = FastAPI(lifespan=lifespan)
+
+@app.get("/", response_class=HTMLResponse)
+async def welcome():
+    return "<h1>HauzMate is running!</h1>"
+
+@app.post(WEBHOOK_PATH)
+async def webhook(request: Request):
+    update_dict = await request.json()
+    logger.info("Incoming webhook: %s", update_dict)
+    update = Update(**update_dict)
+    await dp.feed_update(bot=bot, update=update)
+    return {"ok": True}
