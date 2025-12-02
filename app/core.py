@@ -78,7 +78,7 @@ async def start(message: types.Message, state: FSMContext):
         resize_keyboard=True
     )
     await message.answer(
-        "👋 Welcome to HauzMate!\n\nAre you a space owner or seeker?",
+        "Welcome to HauzMate!\n\nAre you a space owner or seeker?",
         reply_markup=keyboard
     )
     await state.set_state(UserType.user_type)
