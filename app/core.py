@@ -91,13 +91,13 @@ async def user_type_handler(message: types.Message, state: FSMContext):
     if user_type == "Space Owner":
         await state.set_state(OwnerForm.religion)
         await message.answer(
-            "What's your religion preference?",
+            "What's your religion preference you want?",
             reply_markup=get_religion_keyboard()
         )
     else:
         await state.set_state(SeekerForm.religion)
         await message.answer(
-            "What's your religion preference?",
+            "What's your own religion?",
             reply_markup=get_religion_keyboard()
         )
 
@@ -234,7 +234,7 @@ async def seeker_gender(message: types.Message, state: FSMContext):
         reply_markup=get_move_in_keyboard()
     )
 
-@router.message(SeekerForm.move_in, F.text.in_(["ASAP", "1 Month", "3 Months"]))
+@router.message(SeekerForm.move_in, F.text.in_(["1 week", "1 Month", "3 Months"]))
 async def seeker_move_in(message: types.Message, state: FSMContext):
     await state.update_data(move_in=message.text)
     await state.set_state(SeekerForm.preference)

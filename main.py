@@ -6,14 +6,17 @@ from app.core import bot, dp
 from app.config import WEBHOOK_PATH, FULL_WEBHOOK
 import logging
 
+# Setup logger
 logger = logging.getLogger("hauzmate")
+logging.basicConfig(level=logging.INFO)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
+    print("WEBHOOK_PATH:", WEBHOOK_PATH)
+    print("FULL_WEBHOOK:", FULL_WEBHOOK)
+
     await bot.set_webhook(FULL_WEBHOOK)
-    yield
-    # Shutdown
+    yield 
     await bot.session.close()
 
 app = FastAPI(lifespan=lifespan)
@@ -26,54 +29,15 @@ async def welcome():
     <head>
         <title>HauzMate</title>
         <style>
-            body {
-                font-family: Arial, sans-serif;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                height: 100vh;
-                margin: 0;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            }
-            .container {
-                text-align: center;
-                background: white;
-                padding: 40px;
-                border-radius: 10px;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                max-width: 500px;
-            }
-            h1 {
-                color: #333;
-                margin: 0 0 10px;
-            }
-            p {
-                color: #666;
-                margin: 10px 0;
-            }
-            .button-group {
-                margin-top: 30px;
-                display: flex;
-                gap: 10px;
-                justify-content: center;
-            }
-            a {
-                padding: 12px 30px;
-                background: #667eea;
-                color: white;
-                text-decoration: none;
-                border-radius: 5px;
-                transition: background 0.3s;
-            }
-            a:hover {
-                background: #764ba2;
-            }
-            a.secondary {
-                background: #48bb78;
-            }
-            a.secondary:hover {
-                background: #38a169;
-            }
+            body { font-family: Arial; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+            .container { text-align: center; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 500px; }
+            h1 { color: #333; margin: 0 0 10px; }
+            p { color: #666; margin: 10px 0; }
+            .button-group { margin-top: 30px; display: flex; gap: 10px; justify-content: center; }
+            a { padding: 12px 30px; background: #667eea; color: white; text-decoration: none; border-radius: 5px; transition: background 0.3s; }
+            a:hover { background: #764ba2; }
+            a.secondary { background: #48bb78; }
+            a.secondary:hover { background: #38a169; }
         </style>
     </head>
     <body>
@@ -96,12 +60,3 @@ async def webhook(request: Request):
     update = Update(**update_dict)
     await dp.feed_update(bot=bot, update=update)
     return {"ok": True}
-
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    print("WEBHOOK_PATH:", WEBHOOK_PATH)
-    print("FULL_WEBHOOK:", FULL_WEBHOOK)
-
-    await bot.set_webhook(FULL_WEBHOOK)
-    yield
-    await bot.session.close()
