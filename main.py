@@ -96,3 +96,12 @@ async def webhook(request: Request):
     update = Update(**update_dict)
     await dp.feed_update(bot=bot, update=update)
     return {"ok": True}
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("WEBHOOK_PATH:", WEBHOOK_PATH)
+    print("FULL_WEBHOOK:", FULL_WEBHOOK)
+
+    await bot.set_webhook(FULL_WEBHOOK)
+    yield
+    await bot.session.close()

@@ -83,7 +83,6 @@ async def start(message: types.Message, state: FSMContext):
     )
     await state.set_state(UserType.user_type)
 
-# User Type Selection
 @router.message(UserType.user_type, F.text.in_(["Space Owner", "Space Seeker"]))
 async def user_type_handler(message: types.Message, state: FSMContext):
     user_type = message.text
@@ -112,14 +111,14 @@ async def invalid_user_type(message: types.Message):
 async def owner_religion(message: types.Message, state: FSMContext):
     await state.update_data(religion=message.text)
     await state.set_state(OwnerForm.location)
-    await message.answer("📍 What's the property location? (e.g., Lagos, Abuja)")
+    await message.answer("What's the property location? (e.g., Lagos, Abuja)")
 
 @router.message(OwnerForm.location)
 async def owner_location(message: types.Message, state: FSMContext):
     await state.update_data(location=message.text)
     await state.set_state(OwnerForm.house_type)
     await message.answer(
-        "🏠 What type of property?",
+        "What type of property?",
         reply_markup=get_house_type_keyboard()
     )
 
@@ -127,13 +126,13 @@ async def owner_location(message: types.Message, state: FSMContext):
 async def owner_house_type(message: types.Message, state: FSMContext):
     await state.update_data(house_type=message.text)
     await state.set_state(OwnerForm.amenities)
-    await message.answer("✨ List amenities (e.g., WiFi, Pool, Gym, etc.)")
+    await message.answer("List amenities (e.g., WiFi, Pool, Gym, etc.)")
 
 @router.message(OwnerForm.amenities)
 async def owner_amenities(message: types.Message, state: FSMContext):
     await state.update_data(amenities=message.text)
     await state.set_state(OwnerForm.total_rent)
-    await message.answer("💰 What's the total monthly rent? (amount in numbers)")
+    await message.answer("What's the total monthly rent? (amount in numbers)")
 
 @router.message(OwnerForm.total_rent)
 async def owner_total_rent(message: types.Message, state: FSMContext):
@@ -141,7 +140,7 @@ async def owner_total_rent(message: types.Message, state: FSMContext):
         rent = int(message.text)
         await state.update_data(total_rent=rent)
         await state.set_state(OwnerForm.subsequent_pay)
-        await message.answer("📅 When is rent due? (e.g., 1st of month, end of month)")
+        await message.answer("When is rent due? (e.g., 1st of month, end of month)")
     except ValueError:
         await message.answer("Please enter a valid amount")
 
@@ -150,7 +149,7 @@ async def owner_subsequent_pay(message: types.Message, state: FSMContext):
     await state.update_data(subsequent_pay=message.text)
     await state.set_state(OwnerForm.gender)
     await message.answer(
-        "👥 Preferred tenant gender?",
+        "Preferred tenant gender?",
         reply_markup=get_gender_keyboard()
     )
 
@@ -158,13 +157,13 @@ async def owner_subsequent_pay(message: types.Message, state: FSMContext):
 async def owner_gender(message: types.Message, state: FSMContext):
     await state.update_data(gender=message.text)
     await state.set_state(OwnerForm.preference)
-    await message.answer("📝 Any other preferences? (e.g., no smoking, no pets)")
+    await message.answer("Any other preferences? (e.g., no smoking, no pets)")
 
 @router.message(OwnerForm.preference)
 async def owner_preference(message: types.Message, state: FSMContext):
     await state.update_data(preference=message.text)
     await state.set_state(OwnerForm.contact)
-    await message.answer("📱 What's your contact? (Phone or email)")
+    await message.answer("What's your contact? (Phone or email)")
 
 @router.message(OwnerForm.contact)
 async def owner_contact(message: types.Message, state: FSMContext):
@@ -173,7 +172,7 @@ async def owner_contact(message: types.Message, state: FSMContext):
     
     # Format listing
     listing = (
-        f"<b>🏠 SPACE OWNER LISTING</b>\n\n"
+        f"<b>SPACE OWNER LISTING</b>\n\n"
         f"<b>Religion:</b> {data['religion']}\n"
         f"<b>Location:</b> {data['location']}\n"
         f"<b>Property Type:</b> {data['house_type']}\n"
@@ -187,7 +186,7 @@ async def owner_contact(message: types.Message, state: FSMContext):
     )
     
     await bot.send_message(GROUP_ID, listing, parse_mode="HTML")
-    await message.answer("✅ Your listing has been posted! Thank you for using HauzMate.")
+    await message.answer("Your listing has been posted! Thank you for using HauzMate.")
     await state.clear()
 
 # ============ SEEKER FLOW ============
@@ -196,14 +195,14 @@ async def owner_contact(message: types.Message, state: FSMContext):
 async def seeker_religion(message: types.Message, state: FSMContext):
     await state.update_data(religion=message.text)
     await state.set_state(SeekerForm.location)
-    await message.answer("📍 Which location are you looking for?")
+    await message.answer("Which location are you looking for?")
 
 @router.message(SeekerForm.location)
 async def seeker_location(message: types.Message, state: FSMContext):
     await state.update_data(location=message.text)
     await state.set_state(SeekerForm.house_type)
     await message.answer(
-        "🏠 What type of property do you need?",
+        "What type of property do you need?",
         reply_markup=get_house_type_keyboard()
     )
 
@@ -211,7 +210,7 @@ async def seeker_location(message: types.Message, state: FSMContext):
 async def seeker_house_type(message: types.Message, state: FSMContext):
     await state.update_data(house_type=message.text)
     await state.set_state(SeekerForm.budget)
-    await message.answer("💰 What's your budget? (monthly amount)")
+    await message.answer("What's your budget? (monthly amount)")
 
 @router.message(SeekerForm.budget)
 async def seeker_budget(message: types.Message, state: FSMContext):
@@ -220,7 +219,7 @@ async def seeker_budget(message: types.Message, state: FSMContext):
         await state.update_data(budget=budget)
         await state.set_state(SeekerForm.gender)
         await message.answer(
-            "👥 Preferred landlord/housemate gender?",
+            "Preferred landlord/housemate gender?",
             reply_markup=get_gender_keyboard()
         )
     except ValueError:
@@ -231,7 +230,7 @@ async def seeker_gender(message: types.Message, state: FSMContext):
     await state.update_data(gender=message.text)
     await state.set_state(SeekerForm.move_in)
     await message.answer(
-        "📅 When do you want to move in?",
+        "When do you want to move in?",
         reply_markup=get_move_in_keyboard()
     )
 
@@ -239,22 +238,21 @@ async def seeker_gender(message: types.Message, state: FSMContext):
 async def seeker_move_in(message: types.Message, state: FSMContext):
     await state.update_data(move_in=message.text)
     await state.set_state(SeekerForm.preference)
-    await message.answer("📝 Any special requirements? (e.g., near school, quiet area)")
+    await message.answer("Any special requirements? (e.g., near school, quiet area)")
 
 @router.message(SeekerForm.preference)
 async def seeker_preference(message: types.Message, state: FSMContext):
     await state.update_data(preference=message.text)
     await state.set_state(SeekerForm.contact)
-    await message.answer("📱 What's your contact? (Phone or email)")
+    await message.answer("What's your contact? (Phone or email)")
 
 @router.message(SeekerForm.contact)
 async def seeker_contact(message: types.Message, state: FSMContext):
     await state.update_data(contact=message.text)
     data = await state.get_data()
     
-    # Format listing
     listing = (
-        f"<b>🔍 SPACE SEEKER REQUEST</b>\n\n"
+        f"<b>SPACE SEEKER REQUEST</b>\n\n"
         f"<b>Religion:</b> {data['religion']}\n"
         f"<b>Location:</b> {data['location']}\n"
         f"<b>Property Type:</b> {data['house_type']}\n"
@@ -267,7 +265,7 @@ async def seeker_contact(message: types.Message, state: FSMContext):
     )
     
     await bot.send_message(GROUP_ID, listing, parse_mode="HTML")
-    await message.answer("✅ Your request has been posted! Thank you for using HauzMate.")
+    await message.answer("Your request has been posted! Thank you for using HauzMate.")
     await state.clear()
 
 # Include routers
